@@ -1,0 +1,4 @@
+o3 compiler flag
+
+RSA2048 public key operation, code from flash: iters=10 total_us: i15=3764269
+us/op: i15 = 376427
