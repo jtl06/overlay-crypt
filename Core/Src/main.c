@@ -125,7 +125,7 @@ int main(void)
   // us/op with simple rounding
   uint32_t us_per_i15  = (t_i15  + ITERS/2) / ITERS;
 
-  printf("RSA2048 public key operation, code from flash: iters=%lu total_us: i15=%lu\r\n",
+  printf("RSA2048 public key operation, code from RAM: iters=%lu total_us: i15=%lu\r\n",
          (unsigned long)ITERS, (unsigned long)t_i15);
   printf("us/op: i15 = %lu\r\n", (unsigned long)us_per_i15);
 
