@@ -1,10 +1,13 @@
 o3 compiler flag
 
-RSA2048 public key operation, code from flash: iters=10 total_us: i15=3764269
+System Init @ 64000000 Hz
+No Overlay: Function pointer for montgomery mult: 0x8002529
+RSA2048 public key operation, code from flash: iters=10 total_us: i15=3764268
 us/op: i15 = 376427
 
 System Init @ 64000000 Hz
-overlay bytes in RAM: 2416
-br_rsa_i15_public @ 0x8001c7d
-RSA2048 public key operation, code from flash: iters=10 total_us: i15=2828868
-us/op: i15 = 282887
+Overlay: 504 bytes @ 0x8003ab8 -> 0x20001800
+Function pointer: 0x20001801
+br_i15_montmul @ 0x20001801 (expect 0x2000....)
+RSA2048 public key operation, code from flash: iters=10 total_us: i15=2858544
+us/op: i15 = 285854
