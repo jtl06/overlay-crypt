@@ -25,7 +25,7 @@
 /* USER CODE END 0 */
 
 /* TIM3 init function */
-void MX_TIM3_Init(void)
+void MX_TIM2_Init(void)
 {
 
   /* USER CODE BEGIN TIM3_Init 0 */
