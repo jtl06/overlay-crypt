@@ -72,6 +72,17 @@ static uint32_t rsa_pub_bench(size_t iters)
   return LL_TIM_GetCounter(TIM2);  // us
 }
 
+/* Linker symbols */
+extern uint8_t __ovl_montmul_vma_start;
+extern uint8_t __ovl_montmul_lma_start;
+extern uint8_t __ovl_montmul_lma_end;
+
+static void overlay_load_montmul(void) {
+  size_t size = &__ovl_montmul_lma_end - &__ovl_montmul_lma_start;
+  memcpy(&__ovl_montmul_vma_start, &__ovl_montmul_lma_start, size);
+}
+
+
 /**
   * @brief  The application entry point.
   * @retval int
@@ -93,6 +104,19 @@ int main(void)
 
 
   printf("\r\nSystem Init @ %lu Hz\r\n", SystemCoreClock);
+
+  overlay_load_montmul();
+  printf("Overlay: %lu bytes @ %p -> %p\r\n",
+               (unsigned long)(&__ovl_montmul_lma_end - &__ovl_montmul_lma_start),
+               &__ovl_montmul_lma_start,
+               &__ovl_montmul_vma_start);
+  void br_i15_montymul(uint16_t*, const uint16_t*, const uint16_t*, const uint16_t*, uint16_t);
+  printf("Function pointer for montgomery mult: %p\r\n", (void*)br_i15_montymul);
+
+
+  uint8_t tmp[256];
+  memcpy(tmp, M0_be, 256);
+  (void)br_rsa_i15_public(tmp, 256, &pk);
 
   const size_t ITERS = 10;   // adjust as you like (keep small on M0+)
 

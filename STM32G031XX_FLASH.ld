@@ -61,7 +61,8 @@ _Min_Stack_Size = 0x400; /* required amount of stack */
 /* Specify the memory areas */
 MEMORY
 {
-RAM (xrw)      : ORIGIN = 0x20000000, LENGTH = 8K
+RAM (xrw)      : ORIGIN = 0x20000000, LENGTH = 6K
+OVL (rwx)   : ORIGIN = 0x20001800, LENGTH = 2K
 FLASH (rx)      : ORIGIN = 0x8000000, LENGTH = 64K
 }
 
@@ -101,6 +102,27 @@ SECTIONS
     *(.rodata*)        /* .rodata* sections (constants, strings, etc.) */
     . = ALIGN(4);
   } >FLASH
+
+  .ovl_slot :
+  {
+    . = ALIGN(4);
+    KEEP(*(.ovl_montmul*))      /* Keep your overlay code */
+    . = ALIGN(4);
+  } > OVL AT> FLASH
+
+
+
+  /* Export stable symbols for C */
+  PROVIDE(__ovl_montmul_vma_start = ADDR(.ovl_slot));
+  PROVIDE(__ovl_montmul_size      = SIZEOF(.ovl_slot));
+  PROVIDE(__ovl_montmul_lma_start = LOADADDR(.ovl_slot));
+  PROVIDE(__ovl_montmul_lma_end   = LOADADDR(.ovl_slot) + SIZEOF(.ovl_slot));
+
+  /* ADD THIS for completeness */
+  PROVIDE(__ovl_montmul_vma_end   = ADDR(.ovl_slot) + SIZEOF(.ovl_slot));
+
+  /* Guardrail: ensure it fits in the 1KB window */
+  /* ASSERT(SIZEOF(ovl_montmul) <= 4096, "ovl_montmul exceeds 4KB overlay slot!"); */
 
   .ARM.extab (READONLY) : /* The "READONLY" keyword is only supported in GCC11 and later, remove it if using GCC10 or earlier. */
   {
@@ -157,13 +179,10 @@ SECTIONS
     _sdata = .;        /* create a global symbol at data start */
     *(.data)           /* .data sections */
     *(.data*)          /* .data* sections */
-    *(.RamFunc)        /* .RamFunc sections */
-    *(.RamFunc*)       /* .RamFunc* sections */
 
     . = ALIGN(4);
     _edata = .;        /* define a global symbol at data end */
   } >RAM AT> FLASH
-
 
   /* Uninitialized data section */
   . = ALIGN(4);

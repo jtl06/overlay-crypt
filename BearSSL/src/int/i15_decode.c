@@ -25,7 +25,7 @@
 #include "inner.h"
 
 /* see inner.h */
-void
+void 
 br_i15_decode(uint16_t *x, const void *src, size_t len)
 {
 	const unsigned char *buf;
