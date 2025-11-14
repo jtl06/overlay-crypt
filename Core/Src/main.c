@@ -9,16 +9,18 @@
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
-#include "bearssl_rsa.h"
+#include "bearssl_ec.h"
 #include "vectors.h"
 
 /* Macros */
 #define RSA_ITERS 10U
+#define C25519_ITERS 10U
 
 /* Function Prototypes */
 void SystemClock_Config(void);
 int _write(int fd, const char* buf, int size);
-static uint32_t rsa_pub_bench(size_t iters);
+static uint32_t rsa_bench(size_t iters);
+static uint32_t c25519_bench(size_t iters);
 void br_i15_montymul(uint16_t*, const uint16_t*, const uint16_t*, const uint16_t*, uint16_t);
 
 int main(void)
@@ -45,17 +47,23 @@ int main(void)
   memcpy(tmp, M0_be, 256);
   (void)br_rsa_i15_public(tmp, 256, &pk);
 
-  const size_t ITERS = 10;   // adjust as you like (keep small on M0+)
-
-  uint32_t t_i15  = rsa_pub_bench(ITERS);
+  uint32_t rsa_t  = rsa_bench(RSA_ITERS);
 
   // us/op with simple rounding
-  uint32_t us_per_i15  = (t_i15  + ITERS/2) / ITERS;
+  uint32_t rsa_t_per  = (rsa_t  + RSA_ITERS/2) / RSA_ITERS;
 
-  printf("RSA2048 public key operation, code from RAM: iters=%lu total_us: i15=%lu\r\n",
-         (unsigned long)ITERS, (unsigned long)t_i15);
-  printf("us/op: i15 = %lu\r\n", (unsigned long)us_per_i15);
+  printf("RSA2048 verification, code from flash: iters=%lu total_us: i15=%lu\r\n",
+         (unsigned long)RSA_ITERS, (unsigned long)rsa_t);
+  printf("us/op: i15 = %lu\r\n", (unsigned long)rsa_t_per);
 
+  uint32_t c25519_t  = c25519_bench(C25519_ITERS);
+
+  // us/op with simple rounding
+  uint32_t c25519_t_per  = (c25519_t  + C25519_ITERS/2) / C25519_ITERS;
+
+  printf("C25519 verification, code from flash: iters=%lu total_us: i15=%lu\r\n",
+         (unsigned long)C25519_ITERS, (unsigned long)c25519_t);
+  printf("us/op: i15 = %lu\r\n", (unsigned long)c25519_t_per);
   while (1)
   {
   }
@@ -115,7 +123,7 @@ int _write(int fd, const char *buf, int size) {
 }
 
 // rsa benchmark
-static uint32_t rsa_pub_bench(size_t iters) {
+static uint32_t rsa_bench(size_t iters) {
   uint8_t work[256];
 
   LL_TIM_SetCounter(TIM2, 0);
@@ -131,4 +139,22 @@ static uint32_t rsa_pub_bench(size_t iters) {
   }
 
   return LL_TIM_GetCounter(TIM2);  // us
+}
+
+//c25519 benchmark
+static uint32_t c25519_bench(size_t iters) {
+    volatile uint8_t sink = 0;
+    LL_TIM_SetCounter(TIM2, 0);
+    LL_TIM_EnableCounter(TIM2);
+
+    for (size_t i = 0; i < iters; i++) {
+        // In-place: copy peer pub to output, result written over it
+        memcpy(C25519_SHARED, C25519_BOB_PUB, C25519_SIZE);
+        int ok = br_ec_c25519_i15.mul(C25519_SHARED, C25519_SIZE,
+                                      C25519_ALICE_PRIV, C25519_SIZE,
+                                      BR_EC_curve25519);
+        sink ^= C25519_SHARED[0] ^ (uint8_t)ok;
+    }
+    (void)sink;
+    return LL_TIM_GetCounter(TIM2);  // assuming TIM2 = 1 MHz → microseconds
 }

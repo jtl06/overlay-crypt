@@ -24,6 +24,7 @@ BUILD_DIR = build
 ######################################
 # C sources
 C_SOURCES =  \
+$(wildcard BearSSL/src/ec/*.c) \
 $(wildcard BearSSL/src/rsa/*.c) \
 $(wildcard BearSSL/src/int/*.c) \
 $(wildcard BearSSL/src/codec/*.c) \
