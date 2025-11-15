@@ -54,16 +54,16 @@ int main(void)
 
   printf("RSA2048 verification, code from flash: iters=%lu total_us: i15=%lu\r\n",
          (unsigned long)RSA_ITERS, (unsigned long)rsa_t);
-  printf("us/op: i15 = %lu\r\n", (unsigned long)rsa_t_per);
+  printf("us/op: rsa2048 i15 = %lu\r\n\r\n", (unsigned long)rsa_t_per);
 
   uint32_t c25519_t  = c25519_bench(C25519_ITERS);
 
   // us/op with simple rounding
   uint32_t c25519_t_per  = (c25519_t  + C25519_ITERS/2) / C25519_ITERS;
 
-  printf("C25519 verification, code from flash: iters=%lu total_us: i15=%lu\r\n",
+  printf("ecdsa w/ C25519 verification, code from flash: iters=%lu total_us: i15=%lu\r\n",
          (unsigned long)C25519_ITERS, (unsigned long)c25519_t);
-  printf("us/op: i15 = %lu\r\n", (unsigned long)c25519_t_per);
+  printf("us/op: ecdsa m15 = %lu\r\n", (unsigned long)c25519_t_per);
   while (1)
   {
   }
@@ -148,9 +148,9 @@ static uint32_t c25519_bench(size_t iters) {
     LL_TIM_EnableCounter(TIM2);
 
     for (size_t i = 0; i < iters; i++) {
-        // In-place: copy peer pub to output, result written over it
+        //in place
         memcpy(C25519_SHARED, C25519_BOB_PUB, C25519_SIZE);
-        int ok = br_ec_c25519_i15.mul(C25519_SHARED, C25519_SIZE,
+        int ok = br_ec_c25519_m15.mul(C25519_SHARED, C25519_SIZE,
                                       C25519_ALICE_PRIV, C25519_SIZE,
                                       BR_EC_curve25519);
         sink ^= C25519_SHARED[0] ^ (uint8_t)ok;
