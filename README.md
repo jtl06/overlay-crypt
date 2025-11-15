@@ -52,4 +52,4 @@ Output is returned over UART2 at baud `115200`.
 If you would like to run the code without overlays, see the branch at https://github.com/jtl06/overlay-crypt/tree/noverlay.
 
 ## Implementation Notes
-Overlay functions are placed into `.ovl_*` sections via `__attribute__((section(".ovl_xxx")))` and copied into a shared SRAM block by a small runtime (`static void overlay_load(const uint8_t* lma_start, const uint8_t* lma_end)`)
+In the linker script, overlaid functions are placed into `.ovl_*` sections via `__attribute__((section(".ovl_xxx")))`. At runtime, they are then copied into a shared SRAM block by `static void overlay_load(const uint8_t* lma_start, const uint8_t* lma_end)`. 
