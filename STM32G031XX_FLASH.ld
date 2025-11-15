@@ -103,26 +103,29 @@ SECTIONS
     . = ALIGN(4);
   } >FLASH
 
-  .ovl_rsa :
+  OVERLAY : NOCROSSREFS
   {
-    . = ALIGN(4);
-    KEEP(*(.ovl_rsa*))
-    . = ALIGN(4);
-  } > OVL AT > FLASH
+    .ovl_rsa
+    {
+      . = ALIGN(4);
+      KEEP(*(.ovl_rsa*))
+      . = ALIGN(4);
+    }
 
-  /* .ovl_other :
-  {
-    . = ALIGN(4);
-    KEEP(*(.ovl_c25519*))
-    . = ALIGN(4);
-  } > OVL AT > FLASH */
+    .ovl_prime
+    {
+      . = ALIGN(4);
+      KEEP(*(.ovl_prime*))
+      . = ALIGN(4);
+    }
+  } > OVL AT > FLASH
 
   /* Export stable symbols for C */
   PROVIDE(__ovl_vma_start        = ADDR(.ovl_rsa));
   PROVIDE(__ovl_rsa_lma_start    = LOADADDR(.ovl_rsa));
   PROVIDE(__ovl_rsa_lma_end      = LOADADDR(.ovl_rsa) + SIZEOF(.ovl_rsa));
-  /* PROVIDE(__ovl_c25519_lma_start = LOADADDR(.ovl_c25519)); */
-  /* PROVIDE(__ovl_c25519_lma_end   = LOADADDR(.ovl_c25519) + SIZEOF(.ovl_c25519)); */
+  PROVIDE(__ovl_prime_lma_start    = LOADADDR(.ovl_prime));
+  PROVIDE(__ovl_prime_lma_end      = LOADADDR(.ovl_prime) + SIZEOF(.ovl_prime));
 
   .ARM.extab (READONLY) : /* The "READONLY" keyword is only supported in GCC11 and later, remove it if using GCC10 or earlier. */
   {

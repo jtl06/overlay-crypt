@@ -24,11 +24,11 @@ BUILD_DIR = build
 ######################################
 # C sources
 C_SOURCES =  \
-$(wildcard BearSSL/src/ec/*.c) \
-$(wildcard BearSSL/src/rsa/*.c) \
-$(wildcard BearSSL/src/int/*.c) \
-$(wildcard BearSSL/src/codec/*.c) \
+$(wildcard Thirdparty/BearSSL/src/rsa/*.c) \
+$(wildcard Thirdparty/BearSSL/src/int/*.c) \
+$(wildcard Thirdparty/BearSSL/src/codec/*.c) \
 Core/Src/main.c \
+Core/Src/mprime.c \
 Core/Src/gpio.c \
 Core/Src/usart.c \
 Core/Src/stm32g0xx_it.c \
@@ -113,7 +113,7 @@ AS_INCLUDES =
 # C includes
 C_INCLUDES =  \
 -ICore/Inc \
--IBearSSL/inc \
+-IThirdparty/BearSSL/inc \
 -IDrivers/STM32G0xx_HAL_Driver/Inc \
 -IDrivers/CMSIS/Device/ST/STM32G0xx/Include \
 -IDrivers/CMSIS/Include

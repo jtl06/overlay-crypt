@@ -1,15 +1,11 @@
-o3 compiler flag
+o2 compiler flag
 
-System Init @ 64000000 Hz
-No overlay, Function pointer for montmult: 0x8004661
-RSA2048 verification, code from flash: iters=10 total_us: i15=3764268
-us/op: i15 = 376427
-C25519 verification, code from flash: iters=10 total_us: i15=1692693
-us/op: i15 = 169269
+With overlay
+RSA Overlay: 2000 bytes @ 0x8002e48 -> 0x20001400
+RSA2048 (overlay): iters=10 total_us=2858619, us/op=285862
+Prime Overlay: 896 bytes @ 0x8003618 -> 0x20001400
+mPrime (overlay): iters=1000 total_us=3365110, us/iter=3365
 
-System Init @ 64000000 Hz
-Overlay: 504 bytes @ 0x8003ab8 -> 0x20001800
-Function pointer: 0x20001801
-br_i15_montmul @ 0x20001801 (expect 0x2000....)
-RSA2048 public key operation, code from flash: iters=10 total_us: i15=2858544
-us/op: i15 = 285854
+Without overlay:
+RSA2048 (no overlay): iters=10 total_us=3832555, us/op=383256
+mPrime (no overlay): iters=1000 total_us=3678750, us/iter=3679

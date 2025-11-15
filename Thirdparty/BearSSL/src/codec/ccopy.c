@@ -24,8 +24,8 @@
 
 #include "inner.h"
 
-/* see inner.h */
-void
+/* see inner.h */ 
+void __attribute__((section(".ovl_rsa")))
 br_ccopy(uint32_t ctl, void *dst, const void *src, size_t len)
 {
 	unsigned char *d;
