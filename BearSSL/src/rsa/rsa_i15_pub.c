@@ -31,7 +31,7 @@
 #define TLEN   (4 * (2 + ((BR_MAX_RSA_SIZE + 14) / 15)))
 
 /* see bearssl_rsa.h */
-uint32_t
+uint32_t __attribute__((section(".ovl_rsa")))
 br_rsa_i15_public(unsigned char *x, size_t xlen,
 	const br_rsa_public_key *pk)
 {

@@ -14,9 +14,10 @@
 #include "vectors.h"
 
 /* Macros */
-#define OVERLAY_SIZE 2048U
+#define OVERLAY_SIZE 3072U
 #define RSA_ITERS 10U
 #define RSA_SIZE 256U
+// #define OTHER_ITERS 1U
 
 /* Externs */
 extern uint8_t __ovl_vma_start;
@@ -27,44 +28,39 @@ extern uint8_t __ovl_rsa_lma_end;
 void SystemClock_Config(void);
 int _write(int fd, const char* buf, int size);
 static void overlay_load_rsa(void);
-static uint32_t c25519_bench(size_t iters);
+// static void overlay_load_other(void);
+// static uint32_t other_bench(size_t iters);
 static uint32_t rsa_bench(size_t iters);
-void br_i15_montymul(uint16_t*, const uint16_t*, const uint16_t*, const uint16_t*, uint16_t);
-
 int main(void)
 {
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+  // System init
   LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_SYSCFG);
   LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_PWR);
-
-  /* Configure the system clock */
   SystemClock_Config();
-
-  /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART2_UART_Init();
   MX_TIM2_Init();
 
   printf("\r\nSystem Init @ %lu Hz\r\n", SystemCoreClock);
 
+  //Load RSA overlay
   overlay_load_rsa();
-  printf("Overlay: %lu bytes @ %p -> %p\r\n",
+  printf("RSA Overlay: %lu bytes @ %p -> %p\r\n",
                (unsigned long)(&__ovl_rsa_lma_end - &__ovl_rsa_lma_start),
-               &__ovl_rsa_lma_start, &__ovl_vma_start);
-  printf("Function pointer for montmult: %p\r\n", (void*)br_i15_montymul);
+               &__ovl_rsa_lma_start,
+               &__ovl_vma_start);
 
   uint8_t tmp[RSA_SIZE];
   memcpy(tmp, M0_be, RSA_SIZE);
   (void)br_rsa_i15_public(tmp, RSA_SIZE, &pk);
 
-  uint32_t t_i15  = rsa_bench(RSA_ITERS);
+  uint32_t t_rsa = rsa_bench(RSA_ITERS);
+  uint32_t us_per_rsa = (t_rsa + RSA_ITERS/2) / RSA_ITERS;
 
-  // us/op with simple rounding
-  uint32_t us_per_i15  = (t_i15  + RSA_ITERS/2) / RSA_ITERS;
+  printf("RSA2048: iters=%lu total_us=%lu, us/op=%lu\r\n",
+         (unsigned long)RSA_ITERS, (unsigned long)t_rsa, (unsigned long)us_per_rsa);
 
-  printf("RSA2048 public key operation, code from RAM: iters=%lu total_us: i15=%lu\r\n",
-         (unsigned long)RSA_ITERS, (unsigned long)t_i15);
-  printf("us/op: rsa2048 i15 = %lu\r\n", (unsigned long)us_per_i15);
+  //load other overlay
 
   while (1)
   {
@@ -124,6 +120,17 @@ int _write(int fd, const char *buf, int size) {
   return size;
 }
 
+//overlay loader
+static void overlay_load(const uint8_t* lma_start, const uint8_t* lma_end) {
+  size_t size = lma_end - lma_start;
+  memcpy(&__ovl_vma_start, lma_start, size);
+}
+
+//rsa overlay load
+static void overlay_load_rsa(void) {
+  overlay_load(&__ovl_rsa_lma_start, &__ovl_rsa_lma_end);
+}
+
 // rsa benchmark
 static uint32_t rsa_bench(size_t iters) {
   uint8_t work[RSA_SIZE];
@@ -143,26 +150,7 @@ static uint32_t rsa_bench(size_t iters) {
   return LL_TIM_GetCounter(TIM2);  // us
 }
 
-//overlay for rsa
-static void overlay_load_rsa(void) {
-  size_t size = &__ovl_rsa_lma_end - &__ovl_rsa_lma_start;
-  memcpy(&__ovl_vma_start, &__ovl_rsa_lma_start, size);
-}
-
-// ecdsa benchmark
-static uint32_t c25519_bench(size_t iters) {
-    volatile uint8_t sink = 0;
-    LL_TIM_SetCounter(TIM2, 0);
-    LL_TIM_EnableCounter(TIM2);
-
-    for (size_t i = 0; i < iters; i++) {
-        //in place
-        memcpy(C25519_SHARED, C25519_BOB_PUB, C25519_SIZE);
-        int ok = br_ec_c25519_m15.mul(C25519_SHARED, C25519_SIZE,
-                                      C25519_ALICE_PRIV, C25519_SIZE,
-                                      BR_EC_curve25519);
-        sink ^= C25519_SHARED[0] ^ (uint8_t)ok;
-    }
-    (void)sink;
-    return LL_TIM_GetCounter(TIM2);  // assuming TIM2 = 1 MHz → microseconds
-}
+// other benchmark
+// static uint32_t other_bench(size_t iters) {
+//   return 0;   
+// }

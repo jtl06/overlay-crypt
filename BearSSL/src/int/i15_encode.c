@@ -25,7 +25,7 @@
 #include "inner.h"
 
 /* see inner.h */
-void
+void __attribute__((section(".ovl_rsa")))
 br_i15_encode(void *dst, size_t len, const uint16_t *x)
 {
 	unsigned char *buf;

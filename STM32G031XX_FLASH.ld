@@ -61,8 +61,8 @@ _Min_Stack_Size = 0x400; /* required amount of stack */
 /* Specify the memory areas */
 MEMORY
 {
-RAM (xrw)       : ORIGIN = 0x20000000, LENGTH = 5K
-OVL (rwx)       : ORIGIN = 0x20001C00,  LENGTH = 3K
+RAM (xrw)       : ORIGIN = 0x20000000, LENGTH = 5k
+OVL (rwx)       : ORIGIN = 0x20001400,  LENGTH = 3k
 FLASH (rx)      : ORIGIN = 0x08000000, LENGTH = 64K
 }
 
@@ -106,34 +106,23 @@ SECTIONS
   .ovl_rsa :
   {
     . = ALIGN(4);
-    KEEP(*(.ovl_montmul*))
+    KEEP(*(.ovl_rsa*))
     . = ALIGN(4);
   } > OVL AT > FLASH
 
-  .ovl_c25519 :
+  /* .ovl_other :
   {
     . = ALIGN(4);
     KEEP(*(.ovl_c25519*))
     . = ALIGN(4);
-  } > OVL AT > FLASH
+  } > OVL AT > FLASH */
 
   /* Export stable symbols for C */
-  PROVIDE(__ovl_vma_start = ADDR(.ovl_rsa));
-  PROVIDE(__ovl_rsa_size      = SIZEOF(.ovl_rsa));
-  PROVIDE(__ovl_rsa_lma_start = LOADADDR(.ovl_rsa));
-  PROVIDE(__ovl_rsa_lma_end   = LOADADDR(.ovl_rsa) + SIZEOF(.ovl_rsa));
-  PROVIDE(__ovl_c25519_lma_start = LOADADDR(.ovl_c25519));
-  PROVIDE(__ovl_c25519_lma_end   = LOADADDR(.ovl_c25519) + SIZEOF(.ovl_c25519));
-
-  /* ADD THIS for completeness */
-  PROVIDE(__ovl_montmul_vma_end   = ADDR(.ovl_rsa) + SIZEOF(.ovl_rsa));
-
-  .ovl_c25519 :
-  {
-    . = ALIGN(4);
-    KEEP(*(.ovl_c25519*))
-
-  }
+  PROVIDE(__ovl_vma_start        = ADDR(.ovl_rsa));
+  PROVIDE(__ovl_rsa_lma_start    = LOADADDR(.ovl_rsa));
+  PROVIDE(__ovl_rsa_lma_end      = LOADADDR(.ovl_rsa) + SIZEOF(.ovl_rsa));
+  /* PROVIDE(__ovl_c25519_lma_start = LOADADDR(.ovl_c25519)); */
+  /* PROVIDE(__ovl_c25519_lma_end   = LOADADDR(.ovl_c25519) + SIZEOF(.ovl_c25519)); */
 
   .ARM.extab (READONLY) : /* The "READONLY" keyword is only supported in GCC11 and later, remove it if using GCC10 or earlier. */
   {

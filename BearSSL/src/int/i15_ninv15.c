@@ -25,7 +25,7 @@
 #include "inner.h"
 
 /* see inner.h */
-uint16_t
+uint16_t __attribute__((section(".ovl_rsa")))
 br_i15_ninv15(uint16_t x)
 {
 	uint32_t y;

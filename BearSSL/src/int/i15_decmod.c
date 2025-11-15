@@ -25,7 +25,7 @@
 #include "inner.h"
 
 /* see inner.h */
-uint32_t
+uint32_t __attribute__((section(".ovl_rsa")))
 br_i15_decode_mod(uint16_t *x, const void *src, size_t len, const uint16_t *m)
 {
 	/*

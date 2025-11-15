@@ -25,7 +25,7 @@
 #include "inner.h"
 
 /* see inner.h */
-uint32_t
+uint32_t __attribute__((section(".ovl_rsa")))
 br_i15_modpow_opt(uint16_t *x,
 	const unsigned char *e, size_t elen,
 	const uint16_t *m, uint16_t m0i, uint16_t *tmp, size_t twlen)
