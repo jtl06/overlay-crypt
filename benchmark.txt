@@ -1,9 +1,11 @@
 o3 compiler flag
 
 System Init @ 64000000 Hz
-No Overlay: Function pointer for montgomery mult: 0x8002529
-RSA2048 public key operation, code from flash: iters=10 total_us: i15=3764268
+No overlay, Function pointer for montmult: 0x8004661
+RSA2048 verification, code from flash: iters=10 total_us: i15=3764268
 us/op: i15 = 376427
+C25519 verification, code from flash: iters=10 total_us: i15=1692693
+us/op: i15 = 169269
 
 System Init @ 64000000 Hz
 Overlay: 504 bytes @ 0x8003ab8 -> 0x20001800

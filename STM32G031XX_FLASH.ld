@@ -61,9 +61,9 @@ _Min_Stack_Size = 0x400; /* required amount of stack */
 /* Specify the memory areas */
 MEMORY
 {
-RAM (xrw)       : ORIGIN = 0x20000000, LENGTH = 6K
-OVL (rwx)       : ORIGIN = 0x20001800,  LENGTH = 2K
-FLASH (rx)      : ORIGIN = 0x8000000, LENGTH = 64K
+RAM (xrw)       : ORIGIN = 0x20000000, LENGTH = 5K
+OVL (rwx)       : ORIGIN = 0x20001C00,  LENGTH = 3K
+FLASH (rx)      : ORIGIN = 0x08000000, LENGTH = 64K
 }
 
 /* Define output sections */
@@ -103,26 +103,37 @@ SECTIONS
     . = ALIGN(4);
   } >FLASH
 
-  .ovl_slot :
+  .ovl_rsa :
   {
     . = ALIGN(4);
-    KEEP(*(.ovl_montmul*))      /* Keep your overlay code */
+    KEEP(*(.ovl_montmul*))
     . = ALIGN(4);
-  } > OVL AT> FLASH
+  } > OVL AT > FLASH
 
-
+  .ovl_c25519 :
+  {
+    . = ALIGN(4);
+    KEEP(*(.ovl_c25519*))
+    . = ALIGN(4);
+  } > OVL AT > FLASH
 
   /* Export stable symbols for C */
-  PROVIDE(__ovl_montmul_vma_start = ADDR(.ovl_slot));
-  PROVIDE(__ovl_montmul_size      = SIZEOF(.ovl_slot));
-  PROVIDE(__ovl_montmul_lma_start = LOADADDR(.ovl_slot));
-  PROVIDE(__ovl_montmul_lma_end   = LOADADDR(.ovl_slot) + SIZEOF(.ovl_slot));
+  PROVIDE(__ovl_vma_start = ADDR(.ovl_rsa));
+  PROVIDE(__ovl_rsa_size      = SIZEOF(.ovl_rsa));
+  PROVIDE(__ovl_rsa_lma_start = LOADADDR(.ovl_rsa));
+  PROVIDE(__ovl_rsa_lma_end   = LOADADDR(.ovl_rsa) + SIZEOF(.ovl_rsa));
+  PROVIDE(__ovl_c25519_lma_start = LOADADDR(.ovl_c25519));
+  PROVIDE(__ovl_c25519_lma_end   = LOADADDR(.ovl_c25519) + SIZEOF(.ovl_c25519));
 
   /* ADD THIS for completeness */
-  PROVIDE(__ovl_montmul_vma_end   = ADDR(.ovl_slot) + SIZEOF(.ovl_slot));
+  PROVIDE(__ovl_montmul_vma_end   = ADDR(.ovl_rsa) + SIZEOF(.ovl_rsa));
 
-  /* Guardrail: ensure it fits in the 1KB window */
-  /* ASSERT(SIZEOF(ovl_montmul) <= 4096, "ovl_montmul exceeds 4KB overlay slot!"); */
+  .ovl_c25519 :
+  {
+    . = ALIGN(4);
+    KEEP(*(.ovl_c25519*))
+
+  }
 
   .ARM.extab (READONLY) : /* The "READONLY" keyword is only supported in GCC11 and later, remove it if using GCC10 or earlier. */
   {
