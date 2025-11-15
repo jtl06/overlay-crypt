@@ -37,11 +37,9 @@ int main(void)
   MX_USART2_UART_Init();
   MX_TIM2_Init();
 
-
   printf("\r\nSystem Init @ %lu Hz\r\n", SystemCoreClock);
 
   printf("No overlay, Function pointer for montmult: %p\r\n", (void*)br_i15_montymul);
-
 
   uint8_t tmp[256];
   memcpy(tmp, M0_be, 256);
@@ -150,7 +148,7 @@ static uint32_t c25519_bench(size_t iters) {
     for (size_t i = 0; i < iters; i++) {
         //in place
         memcpy(C25519_SHARED, C25519_BOB_PUB, C25519_SIZE);
-        int ok = br_ec_c25519_m15.mul(C25519_SHARED, C25519_SIZE,
+        int ok = br_ec_c25519_i15.mul(C25519_SHARED, C25519_SIZE,
                                       C25519_ALICE_PRIV, C25519_SIZE,
                                       BR_EC_curve25519);
         sink ^= C25519_SHARED[0] ^ (uint8_t)ok;
